@@ -54,6 +54,7 @@ body {
   border-radius: 5px;
   background-color: rgb(75, 75, 131);
   margin: 4px 0;
+  max-width: 85%;
   width: fit-content;
 }
 
@@ -62,6 +63,7 @@ body {
   border-radius: 5px;
   background-color: rgb(55, 114, 182);
   margin: 4px 0 4px auto;
+  max-width: 85%;
   width: fit-content;
 }
 
