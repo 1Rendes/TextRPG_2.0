@@ -80,8 +80,8 @@ const locations = [
   },
   {
     name: 'Смерть монстра',
-    'button text': ['Выйти из пещеры', 'Выйти из пещеры', 'Осмотреться'],
-    'button functions': [goTownFromCave, goTownFromCave, goSecret],
+    'button text': ['Выйти из пещеры', 'Продолжить', 'Осмотреться'],
+    'button functions': [goTownFromCave, goCaveFromCave, goSecret],
     text: 'Монстр кричит "Ааххрг!" и умирает. Вы Получили опыт и немного золота.',
     color: 'lime',
   },
@@ -161,6 +161,13 @@ function goStore() {
 function goCave() {
   updatePlayerChat(
     `Вы направились в пещеру, из которой начинает нести зловонием и слышно странные звуки...`
+  );
+  update(locations[2]);
+}
+
+function goCaveFromCave() {
+  updatePlayerChat(
+    `Вы остались в пещере и видите некоторых монстров. Они вас не заметили...`
   );
   update(locations[2]);
 }
