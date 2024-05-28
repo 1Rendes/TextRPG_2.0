@@ -57,17 +57,28 @@ body {
   width: fit-content;
 }
 
-#controls,
+.player-message {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: rgb(55, 114, 182);
+  margin: 4px 0 4px auto;
+  width: fit-content;
+}
+
 #stats {
-  border: 1px solid #0a0a23;
+  border: 1px solid grey;
+  border-radius: 4px;
   padding: 5px;
   color: #0a0a23;
 }
 
 #controls {
+  padding: 5px;
+  color: #0a0a23;
   display: flex;
   height: 50px;
   gap: 5px;
+  justify-content: center;
 }
 
 #monsterStats {
@@ -76,6 +87,7 @@ body {
   padding: 5px;
   color: #ffffff;
   background-color: #c70d0d;
+  border-radius: 4px;
 }
 
 .stat {
@@ -83,11 +95,10 @@ body {
 }
 
 button {
+  border-radius: 4px;
   cursor: pointer;
   color: #0a0a23;
   background-color: #feac32;
   background-image: linear-gradient(#fecc4c, #ffac33);
   border: 3px solid #feac32;
-  margin-left: auto;
-  margin-right: auto;
 }

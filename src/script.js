@@ -49,7 +49,7 @@ const locations = [
       'Схватка с Драконом',
     ],
     'button functions': [goStore, goCave, fightDragon],
-    text: 'Вы на городской площади. Вы видите вывеску "Лавка".',
+    text: 'Вы на городской площади и видите вывеску "Лавка". Вдали среди холмов виден вход в пещеру.',
   },
   {
     name: 'Лавка',
@@ -68,24 +68,20 @@ const locations = [
       'Сразиться с клыкастым монстром',
       'Вернуться на городскую площадь',
     ],
-    'button functions': [fightSlime, fightBeast, goTown],
-    text: 'Вы вошли в пещеру. Вы видите монстров.',
+    'button functions': [fightSlime, fightBeast, goTownFromCave],
+    text: 'Вы вошли в пещеру. Вы видите некоторых монстров. Они вас не заметили...',
   },
   {
     name: 'Битва',
     'button text': ['Атака', 'Увернуться', 'Сбежать'],
-    'button functions': [attack, dodge, goTown],
+    'button functions': [attack, dodge, goTownFromCave],
     text: 'Вы сражаетесь с монстром.',
     color: 'yellow',
   },
   {
     name: 'Смерть монстра',
-    'button text': [
-      'Вернуться на городскую площадь',
-      'Вернуться на городскую площадь',
-      'Пасхалка',
-    ],
-    'button functions': [goTown, goTown, easterEgg],
+    'button text': ['Выйти из пещеры', 'Выйти из пещеры', 'Осмотреться'],
+    'button functions': [goTownFromCave, goTownFromCave, goSecret],
     text: 'Монстр кричит "Ааххрг!" и умирает. Вы Получили опыт и немного золота.',
     color: 'lime',
   },
@@ -105,10 +101,19 @@ const locations = [
   },
   {
     name: 'Пасхалка',
-    'button text': ['2', '8', 'Вернуться на городскую площадь.'],
-    'button functions': [pickTwo, pickEight, goTown],
-    text: 'Вы нашли секретную игру. Выберите номер выше. Десять чисел определяться случайно. Если среди них будет Ваше число, Вы выиграли!',
-    color: 'magenta',
+    'button text': ['2', '8', 'Выйти из пещеры.'],
+    'button functions': [pickTwo, pickEight, goTownFromCave],
+    text: 'Вы нашли секретный ход и пробрались в него. Здесь стоит сундук но он закрыт. Нужно отгадать число и вы сможете открыть его и забрать золото. На сундуке стоит ловушка, будьте аккуратны.',
+  },
+  {
+    name: 'Секретный ход в пещере',
+    'button text': [
+      'Зажечь факел и продвигаться дальше',
+      'Выйти из пещеры',
+      'Выйти из пещеры',
+    ],
+    'button functions': [easterEgg, goTownFromCave, goTownFromCave],
+    text: 'Из этого хода несёт затхлым воздухом...',
   },
 ];
 
@@ -116,8 +121,13 @@ button1.onclick = goStore;
 button2.onclick = goCave;
 button3.onclick = fightDragon;
 
-function updateHistory(text, color) {
+function updateGameChat(text, color) {
   history.innerHTML += `<span class='game-message' style='color:${color}'>${text}</span>`;
+  history.scrollTop = history.scrollHeight;
+}
+
+function updatePlayerChat(text, color) {
+  history.innerHTML += `<span class='player-message' style='color:${color}'>${text}</span>`;
   history.scrollTop = history.scrollHeight;
 }
 
@@ -130,19 +140,36 @@ function update(location) {
   button2.onclick = location['button functions'][1];
   button3.onclick = location['button functions'][2];
   text.innerHTML = location.text;
-  updateHistory(location.text, location.color);
+  updateGameChat(location.text, location.color);
 }
 
 function goTown() {
+  updatePlayerChat(`Вы выходите из оружейной лавки...`);
+  update(locations[0]);
+}
+
+function goTownFromCave() {
+  updatePlayerChat(`Вы выбираетесь из пещеры на свежий воздух...`);
   update(locations[0]);
 }
 
 function goStore() {
+  updatePlayerChat(`Вы направляетесь в местную оружейную лавку...`);
   update(locations[1]);
 }
 
 function goCave() {
+  updatePlayerChat(
+    `Вы направились в пещеру, из которой начинает нести зловонием и слышно странные звуки...`
+  );
   update(locations[2]);
+}
+
+function goSecret() {
+  updatePlayerChat(
+    `В пещере вы обнаружили дополнительное ответвление, но там очень темно...`
+  );
+  update(locations[8]);
 }
 
 function buyHealth() {
@@ -151,15 +178,17 @@ function buyHealth() {
     health += 10;
     goldText.innerText = gold;
     healthText.innerText = health;
+    updatePlayerChat(`Вы потратили <b>10</b> золота на здоровье`);
   } else {
     text.innerText = 'У Вас нет достаточно золота чтобы купить здоровье';
-    updateHistory(text.innerText, 'red');
+    updateGameChat(text.innerText, 'red');
   }
 }
 
 function buyWeapon() {
   if (currentWeapon < weapons.length - 1) {
     if (gold >= 30) {
+      updatePlayerChat(`Вы потратили <b>30</b> золота на новое оружие`);
       gold -= 30;
       currentWeapon++;
       goldText.innerText = gold;
@@ -167,14 +196,14 @@ function buyWeapon() {
       text.innerText = 'Теперь у Вас ' + newWeapon + '.';
       inventory.push(newWeapon);
       text.innerText += ' В Вашем инвентаре есть: ' + inventory;
-      updateHistory(text.innerText, 'lime');
+      updateGameChat(text.innerText, 'lime');
     } else {
       text.innerText = 'У Вас нет достаточно золота чтобы купить оружие.';
-      updateHistory(text.innerText, 'red');
+      updateGameChat(text.innerText, 'red');
     }
   } else {
     text.innerText = 'У Вас уже есть самое мощное оружие!';
-    updateHistory(text.innerText, 'yellow');
+    updateGameChat(text.innerText, 'yellow');
     button2.innerText = 'Продать оружие за 15 золотых';
     button2.onclick = sellWeapon;
   }
@@ -185,12 +214,13 @@ function sellWeapon() {
     gold += 15;
     goldText.innerText = gold;
     let currentWeapon = inventory.shift();
+    updatePlayerChat(`Вы продали <b>${currentWeapon}</b> за <b>15</b> золота`);
     text.innerText = 'Вы продали ' + currentWeapon + '.';
     text.innerText += ' В Вашем инвентаре есть: ' + inventory;
-    updateHistory(text.innerText);
+    updateGameChat(text.innerText);
   } else {
     text.innerText = 'Не продавайте Ваше единственное оружие!';
-    updateHistory(text.innerText, 'red');
+    updateGameChat(text.innerText, 'red');
   }
 }
 
@@ -210,6 +240,9 @@ function fightDragon() {
 }
 
 function goFight() {
+  updatePlayerChat(
+    `Вы подошли ближе и на вас напал: ${monsters[fighting].name}!`
+  );
   update(locations[3]);
   monsterHealth = monsters[fighting].health;
   monsterStats.style.display = 'block';
@@ -222,13 +255,13 @@ function attack() {
   text.innerText +=
     ' Вы атаковали монстра используя ' + weapons[currentWeapon].name + '.';
   health -= getMonsterAttackValue(monsters[fighting].level);
-  updateHistory(text.innerText, 'yellow');
+  updatePlayerChat(text.innerText, 'yellow');
   if (isMonsterHit()) {
     monsterHealth -=
       weapons[currentWeapon].power + Math.floor(Math.random() * xp) + 1;
   } else {
     text.innerText += ' Вы промахнулись.';
-    updateHistory(text.innerText, 'red');
+    updateGameChat(text.innerText, 'red');
   }
   healthText.innerText = health;
   monsterHealthText.innerText = monsterHealth;
@@ -243,7 +276,7 @@ function attack() {
   }
   if (Math.random() <= 0.1 && inventory.length !== 1) {
     text.innerText += ' Ваш ' + inventory.pop() + ' сломался.';
-    updateHistory(text.innerText, 'red');
+    updateGameChat(text.innerText, 'red');
     currentWeapon--;
   }
 }
@@ -258,8 +291,9 @@ function isMonsterHit() {
 }
 
 function dodge() {
+  updatePlayerChat(`Вы сделали манёвр, чтобы увернуться.`);
   text.innerText = 'Вы увернулись от атаки: ' + monsters[fighting].name;
-  updateHistory(text.innerText, 'lime');
+  updateGameChat(text.innerText, 'lime');
 }
 
 function defeatMonster() {
@@ -291,6 +325,9 @@ function restart() {
 }
 
 function easterEgg() {
+  updatePlayerChat(
+    `Вы зажгли факел и пройдя немного дальше что-то обнаружили...`
+  );
   update(locations[7]);
 }
 
@@ -307,19 +344,25 @@ function pick(guess) {
   while (numbers.length < 10) {
     numbers.push(Math.floor(Math.random() * 11));
   }
-  text.innerText = 'Вы выбрали ' + guess + '. Вот случайные числа:\n';
+  // text.innerText = 'Вы выбрали ' + guess + '. Вот случайные числа:\n';
+  updatePlayerChat(`Вы выбрали ${guess} и пытаетесь открывать сундук...`);
   for (let i = 0; i < 10; i++) {
-    text.innerText += numbers[i] + '\n';
+    // text.innerText += numbers[i] + '\n';
   }
-  updateHistory(text.innerText);
+  // updateGameChat(text.innerText);
   if (numbers.includes(guess)) {
-    text.innerText += 'Верно! Вот Ваши 20 золотых!';
-    updateHistory(text.innerText, 'lime');
+    // text.innerText +=
+    updateGameChat('Сундук открылся! Вы нашли 20 золотых!', 'lime');
+    // updateGameChat(text.innerText, 'lime');
     gold += 20;
     goldText.innerText = gold;
   } else {
-    text.innerText += 'Не верно! Вы потеряли 10 здоровья';
-    updateHistory(text.innerText, 'red');
+    // text.innerText +=
+    updateGameChat(
+      'Сработала ловушка и брызнул опасный яд! Вы потеряли 10 здоровья.',
+      'red'
+    );
+    // updateGameChat(text.innerText, 'red');
     health -= 10;
     healthText.innerText = health;
     if (health <= 0) {
